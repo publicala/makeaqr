@@ -48,12 +48,13 @@
         <script>
             /*
              * Callers that encode the url twice include Volpe, which ships inside
-             * app builds that stay installed for years. A URL never starts with
-             * "http%3A", so a value that still does after get() decoded it once
-             * was encoded twice.
+             * app builds that stay installed for years. A URI never escapes the
+             * colon after its scheme, so a value that still starts with
+             * "https%3A" or "mailto%3A" after get() decoded it once was encoded
+             * twice.
              */
             function readUrlParameter(value) {
-                if (value !== null && /^https?%3A/i.test(value)) {
+                if (value !== null && /^[a-z][a-z0-9+.-]*%3A/i.test(value)) {
                     return decodeURIComponent(value);
                 }
 
