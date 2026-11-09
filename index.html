@@ -46,14 +46,29 @@
         <script src="https://cdn.jsdelivr.net/npm/print-js@1.0.61/dist/print.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.2/dist/FileSaver.min.js"></script>
         <script>
+            /*
+             * Callers that encode the url twice include Volpe, which ships inside
+             * app builds that stay installed for years. A URL never starts with
+             * "http%3A", so a value that still does after get() decoded it once
+             * was encoded twice.
+             */
+            function readUrlParameter(value) {
+                if (value !== null && /^https?%3A/i.test(value)) {
+                    return decodeURIComponent(value);
+                }
+
+                return value;
+            }
+
+            // get() already decodes each value once, the way it was encoded.
             const urlParams = new URLSearchParams(window.location.search);
-            const url = decodeURIComponent(urlParams.get('url'));
-            const name = decodeURIComponent(urlParams.get('name'));
-            const printButtonCopy = decodeURIComponent(urlParams.get('print_copy'));
-            const downloadButtonCopy = decodeURIComponent(urlParams.get('download_copy'));
-            const showActionButtons = decodeURIComponent(urlParams.get('show_action_buttons'));
-            const maxWidth = decodeURIComponent(urlParams.get('max_width'));
-            const maxHeight = decodeURIComponent(urlParams.get('max_height'));
+            const url = readUrlParameter(urlParams.get('url'));
+            const name = urlParams.get('name');
+            const printButtonCopy = urlParams.get('print_copy');
+            const downloadButtonCopy = urlParams.get('download_copy');
+            const showActionButtons = urlParams.get('show_action_buttons');
+            const maxWidth = urlParams.get('max_width');
+            const maxHeight = urlParams.get('max_height');
 
             QRCode.toCanvas(document.getElementById('canvas'), url, error => {
                 if (error) console.error(error);
@@ -78,17 +93,13 @@
                 });
             });
 
-            /*
-             * We're checking `null` like string because `decodeURIComponent` return
-             * the data like string
-             */
-            if (name !== 'null') {
+            if (name !== null) {
                 document.querySelector('#name').innerText = name;
             }
-            if (downloadButtonCopy !== 'null') {
+            if (downloadButtonCopy !== null) {
                 document.querySelector('#save span').innerText = downloadButtonCopy;
             }
-            if (printButtonCopy !== 'null') {
+            if (printButtonCopy !== null) {
                 document.querySelector('#print span').innerText = printButtonCopy;
             }
             if (showActionButtons === 'false') {
@@ -99,13 +110,13 @@
              * Set canvas to take 100% of his container if max-width or max-height is passing
              * in the URL and avoid to crop the QR when this is shown using a iframe.
              */
-            if (maxWidth != 'null' || maxHeight != 'null') {
+            if (maxWidth !== null || maxHeight !== null) {
                 document.querySelector('canvas').classList.add('takeContainerSize');
             }
 
             const qrContainer =  document.querySelector('#qrContainer');
-            qrContainer.style.maxWidth = maxWidth != 'null' ? `${maxWidth}px` : '';
-            qrContainer.style.maxHeight = maxHeight != 'null' ? `${maxHeight}px` : '';
+            qrContainer.style.maxWidth = maxWidth !== null ? `${maxWidth}px` : '';
+            qrContainer.style.maxHeight = maxHeight !== null ? `${maxHeight}px` : '';
         </script>
     </body>
 </html>
