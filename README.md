@@ -25,3 +25,7 @@ Every push to `master` deploys `index.html` to two hosts. There is no build step
 - `makeaqr.com` on Vercel.
 
 Each branch also gets a preview deployment on both hosts.
+
+## Direct visits
+
+`makeaqr.publica.la` draws a QR code only inside an iframe and only for an `http` or `https` URL. Opened directly, it shows an empty page, so a link to that host cannot present someone else's QR code and heading under the Publica.la name. `makeaqr.com` draws any value, embedded or not.

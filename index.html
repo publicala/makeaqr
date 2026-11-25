@@ -71,6 +71,22 @@
             const maxWidth = urlParams.get('max_width');
             const maxHeight = urlParams.get('max_height');
 
+            const EMBED_ONLY_HOSTS = ['makeaqr.publica.la'];
+
+            /*
+             * A direct link to a Publica.la host would show any QR code and
+             * heading under the Publica.la name. Publica.la apps only embed
+             * the page and only encode web addresses, so that host draws
+             * nothing else.
+             */
+            function mayDraw(hostname, isEmbedded, url) {
+                if (!EMBED_ONLY_HOSTS.includes(hostname)) {
+                    return true;
+                }
+
+                return isEmbedded && /^https?:\/\//i.test(url ?? '');
+            }
+
             function drawQr() {
                 QRCode.toCanvas(document.getElementById('canvas'), url, error => {
                     if (error) console.error(error);
@@ -121,7 +137,11 @@
                 qrContainer.style.maxHeight = maxHeight !== null ? `${maxHeight}px` : '';
             }
 
-            drawQr();
+            if (mayDraw(window.location.hostname, window.self !== window.top, url)) {
+                drawQr();
+            } else {
+                document.querySelector('#qrContainer').remove();
+            }
         </script>
     </body>
 </html>
