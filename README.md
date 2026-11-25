@@ -21,7 +21,7 @@ https://makeaqr.publica.la/?url=https%3A%2F%2Fexample.com&name=Example
 
 Every push to `master` deploys `index.html` to two hosts. There is no build step.
 
-- `makeaqr.publica.la` on Cloudflare Pages. Publica.la apps embed this host.
+- `makeaqr.publica.la` on Cloudflare Pages. Publica.la apps embed this host. `_headers` removes the `Access-Control-Allow-Origin: *` header that Pages adds, because no other origin needs to read the page.
 - `makeaqr.com` on Vercel.
 
 Each branch also gets a preview deployment on both hosts.
