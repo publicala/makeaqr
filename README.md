@@ -21,7 +21,11 @@ https://makeaqr.publica.la/?url=https%3A%2F%2Fexample.com&name=Example
 
 Every push to `master` deploys `index.html` to two hosts. There is no build step.
 
-- `makeaqr.publica.la` on Cloudflare Pages. Publica.la apps embed this host.
+- `makeaqr.publica.la` on Cloudflare Pages. Publica.la apps embed this host. `_headers` removes the `Access-Control-Allow-Origin: *` header that Pages adds, because no other origin needs to read the page.
 - `makeaqr.com` on Vercel.
 
 Each branch also gets a preview deployment on both hosts.
+
+## Direct visits
+
+`makeaqr.publica.la` draws a QR code only inside an iframe and only for an `http` or `https` URL. Opened directly, it shows an empty page, so a link to that host cannot present someone else's QR code and heading under the Publica.la name. `makeaqr.com` draws any value, embedded or not.

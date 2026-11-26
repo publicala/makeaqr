@@ -71,53 +71,77 @@
             const maxWidth = urlParams.get('max_width');
             const maxHeight = urlParams.get('max_height');
 
-            QRCode.toCanvas(document.getElementById('canvas'), url, error => {
-                if (error) console.error(error);
-                console.log('success!');
-            });
-
-            document.querySelector('#print').addEventListener('click', event => {
-                printJS({
-                    printable: 'printable',
-                    type: 'html',
-                    header: url,
-                    style: '.canvas{min-width: 350px;min-height: 350px; margin: auto;} .name{font-size: 25px; font-family: sans-serif; text-align: center; margin: 16px auto;}.printable{margin: 16px auto;}',
-                    headerStyle: 'margin: 16px auto; font-size: 16px; font-family: sans-serif; text-align: center; '
-                });
-            });
-
-            document.querySelector('#save').addEventListener('click', event => {
-                const canvas = document.querySelector('#canvas');
-                // draw to canvas...
-                canvas.toBlob(function(blob) {
-                    saveAs(blob, name);
-                });
-            });
-
-            if (name !== null) {
-                document.querySelector('#name').innerText = name;
-            }
-            if (downloadButtonCopy !== null) {
-                document.querySelector('#save span').innerText = downloadButtonCopy;
-            }
-            if (printButtonCopy !== null) {
-                document.querySelector('#print span').innerText = printButtonCopy;
-            }
-            if (showActionButtons === 'false') {
-                document.querySelector('#actionButtons').classList.add('hidden');
-            }
+            const EMBED_ONLY_HOSTS = ['makeaqr.publica.la'];
 
             /*
-             * Set canvas to take 100% of his container if max-width or max-height is passing
-             * in the URL and avoid to crop the QR when this is shown using a iframe.
+             * A direct link to a Publica.la host would show any QR code and
+             * heading under the Publica.la name. Publica.la apps only embed
+             * the page and only encode web addresses, so that host draws
+             * nothing else.
              */
-            if (maxWidth !== null || maxHeight !== null) {
-                document.querySelector('canvas').classList.add('takeContainerSize');
+            function mayDraw(hostname, isEmbedded, url) {
+                if (!EMBED_ONLY_HOSTS.includes(hostname)) {
+                    return true;
+                }
+
+                return isEmbedded && /^https?:\/\//i.test(url ?? '');
             }
 
-            const qrContainer =  document.querySelector('#qrContainer');
-            qrContainer.style.maxWidth = maxWidth !== null ? `${maxWidth}px` : '';
-            qrContainer.style.maxHeight = maxHeight !== null ? `${maxHeight}px` : '';
+            function drawQr() {
+                QRCode.toCanvas(document.getElementById('canvas'), url, error => {
+                    if (error) console.error(error);
+                    console.log('success!');
+                });
+
+                document.querySelector('#print').addEventListener('click', event => {
+                    printJS({
+                        printable: 'printable',
+                        type: 'html',
+                        header: url,
+                        style: '.canvas{min-width: 350px;min-height: 350px; margin: auto;} .name{font-size: 25px; font-family: sans-serif; text-align: center; margin: 16px auto;}.printable{margin: 16px auto;}',
+                        headerStyle: 'margin: 16px auto; font-size: 16px; font-family: sans-serif; text-align: center; '
+                    });
+                });
+
+                document.querySelector('#save').addEventListener('click', event => {
+                    const canvas = document.querySelector('#canvas');
+                    // draw to canvas...
+                    canvas.toBlob(function(blob) {
+                        saveAs(blob, name);
+                    });
+                });
+
+                if (name !== null) {
+                    document.querySelector('#name').innerText = name;
+                }
+                if (downloadButtonCopy !== null) {
+                    document.querySelector('#save span').innerText = downloadButtonCopy;
+                }
+                if (printButtonCopy !== null) {
+                    document.querySelector('#print span').innerText = printButtonCopy;
+                }
+                if (showActionButtons === 'false') {
+                    document.querySelector('#actionButtons').classList.add('hidden');
+                }
+
+                /*
+                 * Set canvas to take 100% of his container if max-width or max-height is passing
+                 * in the URL and avoid to crop the QR when this is shown using a iframe.
+                 */
+                if (maxWidth !== null || maxHeight !== null) {
+                    document.querySelector('canvas').classList.add('takeContainerSize');
+                }
+
+                const qrContainer =  document.querySelector('#qrContainer');
+                qrContainer.style.maxWidth = maxWidth !== null ? `${maxWidth}px` : '';
+                qrContainer.style.maxHeight = maxHeight !== null ? `${maxHeight}px` : '';
+            }
+
+            if (mayDraw(window.location.hostname, window.self !== window.top, url)) {
+                drawQr();
+            } else {
+                document.querySelector('#qrContainer').remove();
+            }
         </script>
     </body>
 </html>
